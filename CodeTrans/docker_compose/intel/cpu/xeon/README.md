@@ -1,6 +1,6 @@
 # Build Mega Service of CodeTrans on Xeon
 
-This document outlines the deployment process for a CodeTrans application utilizing the [GenAIComps](https://github.com/opea-project/GenAIComps.git) microservice pipeline on Intel Xeon server. The steps include Docker image creation, container deployment via Docker Compose, and service execution using microservices `llm`. We will publish the Docker images to Docker Hub soon, it will simplify the deployment process for this service.
+This document outlines the deployment process for a Translation application utilizing the [GenAIComps](https://github.com/opea-project/GenAIComps.git) microservice pipeline on Intel Xeon server, which can support both text and code translation. The steps include Docker image creation, container deployment via Docker Compose, and service execution using microservices `llm`. We will publish the Docker images to Docker Hub soon, it will simplify the deployment process for this service.
 
 ## 🚀 Create an AWS Xeon Instance
 
@@ -54,12 +54,14 @@ Then run the command `docker images`, you will have the following Docker Images:
 ## 🚀 Start Microservices
 
 ### Required Models
+Select the proper model according to your requiremnts. 
 
 By default, the LLM model is set to a default value as listed below:
 
-| Service | Model                              |
-| ------- | ---------------------------------- |
-| LLM     | mistralai/Mistral-7B-Instruct-v0.3 |
+|Task| Service | Model                              |
+|--------------| ------- | ---------------------------------- |
+|Text Translation| LLM     | haoranxu/ALMA-13B |
+|Code Translation| LLM     | mistralai/Mistral-7B-Instruct-v0.3 |
 
 Change the `LLM_MODEL_ID` below for your needs.
 
@@ -121,9 +123,15 @@ docker compose up -d
 3. MegaService
 
    ```bash
+   ## Text Translation
+   curl http://${host_ip}:8888/v1/translation \
+      -H "Content-Type: application/json" \
+      -d '{"language_type": "text", "language_from": "Chinese","language_to": "English","source_language": "我爱机器翻译。"}'
+   
+   ## Code Translation
    curl http://${host_ip}:7777/v1/codetrans \
        -H "Content-Type: application/json" \
-       -d '{"language_from": "Golang","language_to": "Python","source_code": "package main\n\nimport \"fmt\"\nfunc main() {\n    fmt.Println(\"Hello, World!\");\n}"}'
+       -d '{"language_type": "code", "language_from": "Golang","language_to": "Python","source_language": "package main\n\nimport \"fmt\"\nfunc main() {\n    fmt.Println(\"Hello, World!\");\n}"}'
    ```
 
 4. Nginx Service
